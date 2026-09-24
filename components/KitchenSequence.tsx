@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { useScroll, useTransform, useSpring, motion } from "framer-motion";
+import { useScroll, useTransform, useSpring, useReducedMotion, motion } from "framer-motion";
 import NextImage from "next/image";
 import { ArrowRight } from "lucide-react";
 import styles from "./KitchenSequence.module.css";
@@ -10,6 +10,8 @@ const FRAME_COUNT = 144;
 
 export default function KitchenSequence() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const foregroundRef = useRef<HTMLCanvasElement>(null);
+    const reduceMotion = useReducedMotion();
     const containerRef = useRef<HTMLDivElement>(null);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -25,10 +27,14 @@ export default function KitchenSequence() {
         restDelta: 0.001,
     });
 
-    const frameIndex = useTransform(smoothProgress, [0, 1], [0, FRAME_COUNT - 1]);
+    const frameIndex = useTransform(smoothProgress, [0, 0.24, 1], [0, 0, FRAME_COUNT - 1]);
 
     // Opacity transforms: opacityA starts at 1 immediately on page load
-    const opacityA = useTransform(smoothProgress, [0, 0.18, 0.24], [1, 1, 0]);
+    // Hold the opening frame while the heading moves behind its real island outline.
+    const opacityA = useTransform(smoothProgress, [0, 0.14, 0.23], [1, 1, 0]);
+    const titleY = useTransform(smoothProgress, [0, 0.23], ["-11vh", "32vh"]);
+    const sceneScale = useTransform(smoothProgress, [0, 0.24], [1.04, 1.10]);
+    const foregroundOpacity = useTransform(smoothProgress, (v) => v < 0.24 ? 1 : 0);
     const opacityB = useTransform(smoothProgress, [0.24, 0.28, 0.46, 0.50], [0, 1, 1, 0]);
     const opacityC = useTransform(smoothProgress, [0.50, 0.54, 0.72, 0.76], [0, 1, 1, 0]);
     const opacityD = useTransform(smoothProgress, [0.76, 0.80, 0.98, 1.0], [0, 1, 1, 1]);
@@ -65,40 +71,39 @@ export default function KitchenSequence() {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas) return;
-
+        const foreground = foregroundRef.current;
+        const firstImage = images[0];
+        if (!canvas || !foreground || !firstImage) return;
         const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        const foregroundCtx = foreground.getContext("2d");
+        if (!ctx || !foregroundCtx) return;
 
-        if (images.length > 0) {
-            canvas.width = images[0].naturalWidth || 1920;
-            canvas.height = images[0].naturalHeight || 1080;
-        } else {
-            const isMobile = window.innerWidth < 768;
-            canvas.width = isMobile ? 1080 : 1920;
-            canvas.height = isMobile ? 1920 : 1080;
-        }
+        const width = firstImage.naturalWidth;
+        const height = firstImage.naturalHeight;
+        canvas.width = foreground.width = width;
+        canvas.height = foreground.height = height;
 
+        // Coordinates follow the island in each opening photograph. Both canvases
+        // share object-fit and scale, so the cutout stays registered on any viewport.
+        const mobile = height > width;
+        const island = new Path2D(mobile
+            ? "M259 805 L637 780 L720 800 L720 1280 L470 1280 L467 1215 L319 1201 L270 1092 L267 840 Z"
+            : "M769 664 L833 617 L1100 617 L1166 663 L1166 680 L1128 685 L1128 727 C1192 723 1180 754 1133 754 L1133 759 C1224 752 1231 793 1160 797 L1128 797 L1128 1045 L1033 1045 L1033 1080 L865 1080 L873 1047 L820 1047 L819 1007 L789 1007 L787 685 L769 680 Z");
+        foregroundCtx.save();
+        foregroundCtx.scale(width / (mobile ? 720 : 1920), height / (mobile ? 1280 : 1080));
+        foregroundCtx.clip(island);
+        foregroundCtx.drawImage(firstImage, 0, 0, mobile ? 720 : 1920, mobile ? 1280 : 1080);
+        foregroundCtx.restore();
+
+        let lastIndex = -1;
         const render = () => {
-            if (images.length === 0) return;
-
-            const index = Math.round(frameIndex.get());
-            const safeIndex = Math.min(Math.max(index, 0), images.length - 1);
-            const image = images[safeIndex];
-
-            if (image) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            }
-
-            requestAnimationFrame(render);
+            const index = Math.min(Math.max(Math.round(frameIndex.get()), 0), images.length - 1);
+            if (index === lastIndex) return;
+            ctx.drawImage(images[index], 0, 0, width, height);
+            lastIndex = index;
         };
-
-        const animationId = requestAnimationFrame(render);
-
-        return () => {
-            cancelAnimationFrame(animationId);
-        };
+        render();
+        return frameIndex.on("change", render);
     }, [images, frameIndex]);
 
     const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.05], [1, 0]);
@@ -115,46 +120,52 @@ export default function KitchenSequence() {
         <div id="inicio" ref={containerRef} className="h-[450vh] relative bg-[#050505]">
             <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
                 <div
-                    className={`absolute inset-0 z-20 pointer-events-none transition-opacity duration-500 ${isLoading ? 'opacity-100' : 'opacity-0'}`}
+                    className={`absolute inset-0 z-0 pointer-events-none transition-opacity duration-500 ${isLoading ? 'opacity-100' : 'opacity-0'}`}
                 >
                     <NextImage
                         src="/framesmobile/ezgif-frame-001.jpg"
                         alt="Hero Mobile"
                         fill
-                        className="object-cover md:hidden"
+                        className="object-cover scale-[1.04] md:hidden"
                         priority
                     />
                     <NextImage
                         src="/sequence/ezgif-frame-001.jpg"
                         alt="Hero Desktop"
                         fill
-                        className="object-cover hidden md:block"
+                        className="object-cover scale-[1.04] hidden md:block"
                         priority
                     />
                 </div>
 
                 {/* Dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-40 pointer-events-none" />
 
-                <canvas
+                <motion.canvas
                     ref={canvasRef}
-                    className="w-full h-full object-cover scale-105 relative z-0"
+                    aria-hidden="true"
+                    style={{ scale: reduceMotion ? 1.04 : sceneScale }}
+                    className="w-full h-full object-cover relative z-0"
                 />
-
-                <div aria-hidden="true" className={styles.textBackdrop} />
+                <motion.canvas
+                    ref={foregroundRef}
+                    aria-hidden="true"
+                    style={{ scale: reduceMotion ? 1.04 : sceneScale, opacity: foregroundOpacity }}
+                    className="absolute inset-0 w-full h-full object-cover z-30 pointer-events-none"
+                />
 
                 {/* Scrollytelling Overlays */}
                 <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-center items-center">
                     {/* Beat A (Primary H1) */}
                     <motion.div
-                        style={{ opacity: opacityA }}
-                        className={styles.beat}
+                        style={{ opacity: opacityA, y: reduceMotion ? "-11vh" : titleY }}
+                        className={`${styles.beat} ${styles.openingBeat}`}
                     >
                         <p className={styles.eyebrow}>
                             RECRUTAMENTO DE CONSTRUÇÃO CIVIL
                         </p>
                         <h1
-                            className={`${styles.title} ${styles.environmentTitle}`}
+                            className={`${styles.title} ${styles.sceneTitle}`}
                         >
                             <span className={styles.titleLine}>O teu trabalho constrói</span>{" "}
                             <span className={styles.titleLine}>mais do que edifícios.</span>{" "}
@@ -235,7 +246,7 @@ export default function KitchenSequence() {
                 <motion.div
                     initial={{ opacity: 0, y: 0 }}
                     style={{ opacity: scrollIndicatorOpacity }}
-                    animate={{ y: 8 }}
+                    animate={{ y: reduceMotion ? 0 : 8 }}
                     transition={{
                         opacity: { duration: 0.5 },
                         y: { repeat: Infinity, repeatType: "reverse", duration: 1.5, ease: "easeInOut" }
