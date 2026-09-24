@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { useScroll, useTransform, useSpring, motion } from "framer-motion";
 import NextImage from "next/image";
 import { ArrowRight } from "lucide-react";
+import styles from "./KitchenSequence.module.css";
 
 const FRAME_COUNT = 144;
 
@@ -140,28 +141,25 @@ export default function KitchenSequence() {
                     className="w-full h-full object-cover scale-105 relative z-0"
                 />
 
+                <div aria-hidden="true" className={styles.textBackdrop} />
+
                 {/* Scrollytelling Overlays */}
                 <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-center items-center">
                     {/* Beat A (Primary H1) */}
                     <motion.div
                         style={{ opacity: opacityA }}
-                        className="absolute inset-0 flex flex-col items-center justify-center pt-24 md:pt-0 text-center px-4 md:px-8 max-w-5xl mx-auto"
+                        className={styles.beat}
                     >
-                        <p className="text-xs md:text-sm tracking-[0.25em] uppercase mb-4 md:mb-6 font-bold text-[#E0C097] drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                        <p className={styles.eyebrow}>
                             RECRUTAMENTO DE CONSTRUÇÃO CIVIL
                         </p>
                         <h1
-                            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-center leading-[1.15] mb-4 md:mb-6 text-white"
-                            style={{
-                                textShadow: `
-                                    0 4px 20px rgba(0,0,0,0.9),
-                                    0 2px 4px rgba(0,0,0,0.8)
-                                `
-                            }}
+                            className={styles.title}
                         >
-                            O TEU TRABALHO CONSTRÓI MAIS DO QUE EDIFÍCIOS.
-                            <span className="block text-[#E0C097] mt-2 md:mt-4">
-                                CONSTRÓI O TEU FUTURO.
+                            <span className={styles.titleLine}>O teu trabalho constrói</span>{" "}
+                            <span className={styles.titleLine}>mais do que edifícios.</span>{" "}
+                            <span className={styles.accent}>
+                                Constrói o teu futuro.
                             </span>
                         </h1>
                     </motion.div>
@@ -169,23 +167,17 @@ export default function KitchenSequence() {
                     {/* Beat B (H2) */}
                     <motion.div
                         style={{ opacity: opacityB }}
-                        className="absolute inset-0 flex flex-col items-center justify-center pt-24 md:pt-0 text-center px-4 md:px-8 max-w-5xl mx-auto"
+                        className={styles.beat}
                     >
-                        <p className="text-xs md:text-sm tracking-[0.25em] uppercase mb-4 md:mb-6 font-bold text-[#E0C097] drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                        <p className={styles.eyebrow}>
                             RECONHECIMENTO PROFISSIONAL
                         </p>
                         <h2
-                            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-center leading-[1.15] mb-4 md:mb-6 text-white"
-                            style={{
-                                textShadow: `
-                                    0 4px 20px rgba(0,0,0,0.9),
-                                    0 2px 4px rgba(0,0,0,0.8)
-                                `
-                            }}
+                            className={styles.title}
                         >
-                            TODOS OS DIAS, MILHARES DE PESSOAS
+                            Todos os dias, milhares de pessoas
                         </h2>
-                        <p className="text-lg md:text-2xl lg:text-3xl text-gray-200 font-light max-w-3xl leading-relaxed mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        <p className={styles.description}>
                             entram em casas, hospitais, escolas e empresas construídas por profissionais como tu.
                         </p>
                     </motion.div>
@@ -193,23 +185,17 @@ export default function KitchenSequence() {
                     {/* Beat C (H2) */}
                     <motion.div
                         style={{ opacity: opacityC }}
-                        className="absolute inset-0 flex flex-col items-center justify-center pt-24 md:pt-0 text-center px-4 md:px-8 max-w-5xl mx-auto"
+                        className={styles.beat}
                     >
-                        <p className="text-xs md:text-sm tracking-[0.25em] uppercase mb-4 md:mb-6 font-bold text-[#E0C097] drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                        <p className={styles.eyebrow}>
                             O TEU VALOR
                         </p>
                         <h2
-                            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-center leading-[1.15] mb-4 md:mb-6 text-white"
-                            style={{
-                                textShadow: `
-                                    0 4px 20px rgba(0,0,0,0.9),
-                                    0 2px 4px rgba(0,0,0,0.8)
-                                `
-                            }}
+                            className={styles.title}
                         >
-                            O TEU TRABALHO VÊ-SE. O TEU ESFORÇO CONTA.
+                            O teu trabalho vê-se. O teu esforço conta.
                         </h2>
-                        <p className="text-lg md:text-2xl lg:text-3xl text-gray-200 font-light max-w-3xl leading-relaxed mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        <p className={styles.description}>
                             E a tua experiência tem valor.
                         </p>
                     </motion.div>
@@ -217,23 +203,17 @@ export default function KitchenSequence() {
                     {/* Beat D (H2 + CTA - interactive only when visible) */}
                     <motion.div
                         style={{ opacity: opacityD, pointerEvents: pointerEventsD }}
-                        className="absolute inset-0 flex flex-col items-center justify-center pt-24 md:pt-0 text-center px-4 md:px-8 max-w-5xl mx-auto"
+                        className={styles.beat}
                     >
-                        <p className="text-xs md:text-sm tracking-[0.25em] uppercase mb-4 md:mb-6 font-bold text-[#E0C097] drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                        <p className={styles.eyebrow}>
                             A TUA OPORTUNIDADE
                         </p>
                         <h2
-                            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-center leading-[1.15] mb-4 md:mb-6 text-white"
-                            style={{
-                                textShadow: `
-                                    0 4px 20px rgba(0,0,0,0.9),
-                                    0 2px 4px rgba(0,0,0,0.8)
-                                `
-                            }}
+                            className={styles.title}
                         >
-                            ESTÁ NA ALTURA DE ENCONTRARES UMA EMPRESA
+                            Está na altura de encontrares uma empresa
                         </h2>
-                        <p className="text-lg md:text-2xl lg:text-3xl text-gray-200 font-light max-w-3xl leading-relaxed mb-8 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                        <p className={styles.description}>
                             que reconheça isso.
                         </p>
 
@@ -245,7 +225,7 @@ export default function KitchenSequence() {
                                 <span>QUERO ENCONTRAR TRABALHO</span>
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             </button>
-                            <span className="text-xs md:text-sm text-gray-300 mt-3 font-medium drop-shadow">
+                            <span className={styles.caption}>
                                 Envia o teu currículo gratuitamente. Demora menos de 2 minutos.
                             </span>
                         </div>
