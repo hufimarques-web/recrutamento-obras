@@ -5,12 +5,12 @@ import { STAGES,CONTACTS,PRIORITIES } from '@/lib/recruitment-types';
 import { validateInput } from '@/lib/recruitment-validation';
 export const runtime='nodejs';
 export async function PATCH(req:NextRequest,{params}:{params:Promise<{id:string}>}){
- if(!authenticated(req))return json({error:'Inicia sessão para continuar.'},401);
+ if(!(await authenticated(req)))return json({error:'Inicia sessão para continuar.'},401);
  if(!sameOrigin(req))return json({error:'Origem não autorizada.'},403);
  try{
   const data=await req.json();if(!Number.isInteger(data.version))return json({error:'Versão da ficha em falta.'},400);
   const {id}=await params;
-  const lead=updateCandidate(id,data.version,c=>{
+  const lead=await updateCandidate(id,data.version,c=>{
    const now=new Date().toISOString();
    if(data.profile){Object.assign(c,validateInput(data.profile));c.activities.unshift({id:newId(),at:now,type:'update',text:'Dados de contacto e perfil atualizados.'});}
    for(const [field,options] of [['stage',STAGES],['contact',CONTACTS],['priority',PRIORITIES]] as const){

@@ -202,10 +202,18 @@ export default function CandidaturaForm({ embedded = false }: { embedded?: boole
         if (!submissionKey.current) submissionKey.current = crypto.randomUUID();
         const payload = new window.FormData();
         Object.entries(formData).forEach(([key,value]) => payload.append(key,String(value)));
-        if (selectedFile) payload.append("curriculo",selectedFile);
+
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 45000);
+        const timeout = setTimeout(() => controller.abort(), 180000);
         try {
+            if (selectedFile) {
+                const size=2*1024*1024,parts=Math.ceil(selectedFile.size/size);
+                for(let part=0;part<parts;part++){
+                    const result=await fetch("/api/candidaturas/curriculo",{method:"PUT",headers:{"Upload-Key":submissionKey.current,"Upload-Part":String(part)},body:selectedFile.slice(part*size,(part+1)*size),signal:controller.signal});
+                    if(!result.ok){const failure=await result.json();throw new Error(failure.error||"Não foi possível carregar o currículo.");}
+                }
+                payload.append("uploadKey",submissionKey.current);payload.append("uploadParts",String(parts));payload.append("uploadName",selectedFile.name);
+            }
             const response = await fetch("/api/candidaturas",{method:"POST",body:payload,headers:{"Idempotency-Key":submissionKey.current},signal:controller.signal});
             const result = await response.json();
             if (!response.ok) {
