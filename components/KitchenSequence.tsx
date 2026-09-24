@@ -32,7 +32,7 @@ export default function KitchenSequence() {
     // Opacity transforms: opacityA starts at 1 immediately on page load
     // Hold the opening frame while the heading moves behind its real island outline.
     const opacityA = useTransform(smoothProgress, [0, 0.14, 0.23], [1, 1, 0]);
-    const titleY = useTransform(smoothProgress, [0, 0.23], ["-15vh", "32vh"]);
+    const titleY = useTransform(smoothProgress, [0, 0.23], ["-9vh", "26vh"]);
     const sceneScale = useTransform(smoothProgress, [0, 0.24], [1.04, 1.10]);
     const foregroundOpacity = useTransform(smoothProgress, (v) => v < 0.24 ? 1 : 0);
     const opacityB = useTransform(smoothProgress, [0.24, 0.28, 0.46, 0.50], [0, 1, 1, 0]);
@@ -155,21 +155,15 @@ export default function KitchenSequence() {
                 <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-center items-center">
                     {/* Beat A (Primary H1) */}
                     <motion.div
-                        style={{ opacity: opacityA, y: reduceMotion ? "-15vh" : titleY }}
+                        style={{ opacity: opacityA, y: reduceMotion ? "-9vh" : titleY }}
                         className={`${styles.beat} ${styles.openingBeat}`}
                     >
-                        <p className={styles.eyebrow}>
-                            RECRUTAMENTO DE CONSTRUÇÃO CIVIL
-                        </p>
-                        <h1
-                            className={`${styles.title} ${styles.sceneTitle}`}
-                        >
-                            <span className={styles.titleLine}>O teu trabalho constrói</span>{" "}
-                            <span className={styles.titleLine}>mais do que edifícios.</span>{" "}
-                            <span className={styles.accent}>
-                                Constrói o teu futuro.
-                            </span>
+                        <h1 className={`${styles.title} ${styles.sceneTitle}`}>
+                            Constrói o teu futuro.
                         </h1>
+                        <p className={styles.openingSubtitle}>
+                            Novas oportunidades na construção.
+                        </p>
                     </motion.div>
 
                     {/* Beat B (H2) */}
