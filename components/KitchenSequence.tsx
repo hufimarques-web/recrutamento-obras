@@ -32,7 +32,7 @@ export default function KitchenSequence() {
     // Opacity transforms: opacityA starts at 1 immediately on page load
     // Hold the opening frame while the heading moves behind its real island outline.
     const opacityA = useTransform(smoothProgress, [0, 0.14, 0.23], [1, 1, 0]);
-    const titleY = useTransform(smoothProgress, [0, 0.23], ["-11vh", "32vh"]);
+    const titleY = useTransform(smoothProgress, [0, 0.23], ["-15vh", "32vh"]);
     const sceneScale = useTransform(smoothProgress, [0, 0.24], [1.04, 1.10]);
     const foregroundOpacity = useTransform(smoothProgress, (v) => v < 0.24 ? 1 : 0);
     const opacityB = useTransform(smoothProgress, [0.24, 0.28, 0.46, 0.50], [0, 1, 1, 0]);
@@ -126,39 +126,36 @@ export default function KitchenSequence() {
                         src="/framesmobile/ezgif-frame-001.jpg"
                         alt="Hero Mobile"
                         fill
-                        className="object-cover scale-[1.04] md:hidden"
+                        className={`${styles.sceneImage} object-cover scale-[1.04] md:hidden`}
                         priority
                     />
                     <NextImage
                         src="/sequence/ezgif-frame-001.jpg"
                         alt="Hero Desktop"
                         fill
-                        className="object-cover scale-[1.04] hidden md:block"
+                        className={`${styles.sceneImage} object-cover scale-[1.04] hidden md:block`}
                         priority
                     />
                 </div>
-
-                {/* Dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30 z-40 pointer-events-none" />
 
                 <motion.canvas
                     ref={canvasRef}
                     aria-hidden="true"
                     style={{ scale: reduceMotion ? 1.04 : sceneScale }}
-                    className="w-full h-full object-cover relative z-0"
+                    className={`${styles.sceneImage} w-full h-full object-cover relative z-0`}
                 />
                 <motion.canvas
                     ref={foregroundRef}
                     aria-hidden="true"
                     style={{ scale: reduceMotion ? 1.04 : sceneScale, opacity: foregroundOpacity }}
-                    className="absolute inset-0 w-full h-full object-cover z-30 pointer-events-none"
+                    className={`${styles.sceneImage} absolute inset-0 w-full h-full object-cover z-30 pointer-events-none`}
                 />
 
                 {/* Scrollytelling Overlays */}
                 <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-center items-center">
                     {/* Beat A (Primary H1) */}
                     <motion.div
-                        style={{ opacity: opacityA, y: reduceMotion ? "-11vh" : titleY }}
+                        style={{ opacity: opacityA, y: reduceMotion ? "-15vh" : titleY }}
                         className={`${styles.beat} ${styles.openingBeat}`}
                     >
                         <p className={styles.eyebrow}>
