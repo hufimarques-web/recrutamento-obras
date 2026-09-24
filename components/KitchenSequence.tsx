@@ -154,7 +154,7 @@ export default function KitchenSequence() {
                             RECRUTAMENTO DE CONSTRUÇÃO CIVIL
                         </p>
                         <h1
-                            className={styles.title}
+                            className={`${styles.title} ${styles.environmentTitle}`}
                         >
                             <span className={styles.titleLine}>O teu trabalho constrói</span>{" "}
                             <span className={styles.titleLine}>mais do que edifícios.</span>{" "}

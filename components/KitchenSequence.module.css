@@ -3,7 +3,7 @@
   inset: 0;
   z-index: 20;
   pointer-events: none;
-  background: radial-gradient(ellipse 65% 48% at 50% 49%, rgba(31, 24, 17, 0.38), rgba(31, 24, 17, 0.16) 62%, transparent 100%);
+  background: radial-gradient(ellipse 65% 48% at 50% 49%, rgba(31, 24, 17, 0.20), rgba(31, 24, 17, 0.08) 62%, transparent 100%);
 }
 
 .beat {
@@ -80,7 +80,7 @@
   .title { font-size: clamp(1.75rem, 7.7vw, 2.625rem); }
   .accent { font-size: 0.88em; }
   .textBackdrop {
-    background: radial-gradient(ellipse 90% 42% at 50% 48%, rgba(31, 24, 17, 0.42), rgba(31, 24, 17, 0.14) 72%, transparent 100%);
+    background: radial-gradient(ellipse 90% 42% at 50% 48%, rgba(31, 24, 17, 0.26), rgba(31, 24, 17, 0.10) 72%, transparent 100%);
   }
 }
 
@@ -90,4 +90,45 @@
   .eyebrow { margin-bottom: 0.75rem; }
   .accent, .description { margin-top: 0.75rem; }
   .description { margin-bottom: 0.5rem; font-size: 1rem; }
+}
+
+/* Raised, warm stone lettering lit from the window on the left. */
+.environmentTitle {
+  transform: perspective(1400px) rotateY(-5deg) rotateX(2deg) rotateZ(-0.5deg);
+  transform-origin: 50% 50%;
+  color: #e9dfcb;
+  text-shadow:
+    -0.5px -0.5px 0 rgba(255, 248, 227, 0.5),
+    0.75px 0.75px 0 #b0a18a,
+    1.5px 1.5px 0 #8a7961,
+    2px 2px 1px rgba(60, 44, 25, 0.4),
+    4px 5px 6px rgba(25, 19, 12, 0.28);
+}
+
+.environmentTitle .accent {
+  color: #cbb28a;
+  text-shadow:
+    -0.5px -0.5px 0 rgba(250, 225, 182, 0.45),
+    1px 1px 0 #9a8059,
+    1.5px 1.5px 0 #715b3d,
+    2px 2px 1px rgba(55, 39, 20, 0.35),
+    4px 5px 6px rgba(25, 19, 12, 0.28);
+}
+
+@media (max-width: 639px) {
+  .environmentTitle {
+    transform: perspective(900px) rotateY(-3deg) rotateX(1deg);
+    text-shadow:
+      -0.5px -0.5px 0 rgba(255, 248, 227, 0.6),
+      1px 1px 0 #9b8a70,
+      2px 2px 1px rgba(60, 44, 25, 0.5),
+      4px 4px 5px rgba(25, 19, 12, 0.3);
+  }
+  .environmentTitle .accent {
+    text-shadow:
+      -0.5px -0.5px 0 rgba(250, 225, 182, 0.55),
+      1px 1px 0 #8e744f,
+      2px 2px 1px rgba(55, 39, 20, 0.45),
+      4px 4px 5px rgba(25, 19, 12, 0.3);
+  }
 }
