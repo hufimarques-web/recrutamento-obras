@@ -11,6 +11,7 @@ const FRAME_COUNT = 144;
 export default function KitchenSequence() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const foregroundRef = useRef<HTMLCanvasElement>(null);
+    const finalForegroundRef = useRef<HTMLCanvasElement>(null);
     const reduceMotion = useReducedMotion();
     const containerRef = useRef<HTMLDivElement>(null);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
@@ -27,17 +28,22 @@ export default function KitchenSequence() {
         restDelta: 0.001,
     });
 
-    const frameIndex = useTransform(smoothProgress, [0, 0.24, 1], [0, 0, FRAME_COUNT - 1]);
+    const frameIndex = useTransform(smoothProgress, [0, 0.24, 0.76, 1], [0, 0, FRAME_COUNT - 1, FRAME_COUNT - 1]);
 
     // Opacity transforms: opacityA starts at 1 immediately on page load
     // Hold the opening frame while the heading moves behind its real island outline.
     const opacityA = useTransform(smoothProgress, [0, 0.14, 0.23], [1, 1, 0]);
     const titleY = useTransform(smoothProgress, [0, 0.23], ["-9vh", "26vh"]);
-    const sceneScale = useTransform(smoothProgress, [0, 0.24], [1.04, 1.10]);
+    const sceneScale = useTransform(smoothProgress, [0, 0.24, 0.76, 1], [1.04, 1.10, 1.10, 1.16]);
     const foregroundOpacity = useTransform(smoothProgress, (v) => v < 0.24 ? 1 : 0);
     const opacityB = useTransform(smoothProgress, [0.24, 0.28, 0.46, 0.50], [0, 1, 1, 0]);
     const opacityC = useTransform(smoothProgress, [0.50, 0.54, 0.72, 0.76], [0, 1, 1, 0]);
     const opacityD = useTransform(smoothProgress, [0.76, 0.80, 0.98, 1.0], [0, 1, 1, 1]);
+
+    const readabilityOpacity = useTransform(smoothProgress, [0.20, 0.28, 0.70, 0.76], [0, 1, 1, 0]);
+    const finalForegroundOpacity = useTransform(smoothProgress, (v) => v >= 0.76 ? 1 : 0);
+    const finalTitleY = useTransform(smoothProgress, [0.76, 0.82, 1], ["-11vh", "-11vh", "26vh"]);
+    const finalTextOpacity = useTransform(smoothProgress, [0.76, 0.80, 0.97, 1], [0, 1, 1, 0]);
 
     // Interactive transforms for pointer events to avoid invisible focusable/clickable CTA
     const pointerEventsD = useTransform(smoothProgress, (v) => (v >= 0.76 ? "auto" : "none"));
@@ -72,16 +78,18 @@ export default function KitchenSequence() {
     useEffect(() => {
         const canvas = canvasRef.current;
         const foreground = foregroundRef.current;
+        const finalForeground = finalForegroundRef.current;
         const firstImage = images[0];
-        if (!canvas || !foreground || !firstImage) return;
+        if (!canvas || !foreground || !finalForeground || !firstImage) return;
         const ctx = canvas.getContext("2d");
         const foregroundCtx = foreground.getContext("2d");
-        if (!ctx || !foregroundCtx) return;
+        const finalCtx = finalForeground.getContext("2d");
+        if (!ctx || !foregroundCtx || !finalCtx) return;
 
         const width = firstImage.naturalWidth;
         const height = firstImage.naturalHeight;
-        canvas.width = foreground.width = width;
-        canvas.height = foreground.height = height;
+        canvas.width = foreground.width = finalForeground.width = width;
+        canvas.height = foreground.height = finalForeground.height = height;
 
         // Coordinates follow the island in each opening photograph. Both canvases
         // share object-fit and scale, so the cutout stays registered on any viewport.
@@ -94,6 +102,17 @@ export default function KitchenSequence() {
         foregroundCtx.clip(island);
         foregroundCtx.drawImage(firstImage, 0, 0, mobile ? 720 : 1920, mobile ? 1280 : 1080);
         foregroundCtx.restore();
+
+        // The last photograph is held for the closing parallax, so its island
+        // can occlude the heading without drifting against the renovation frames.
+        const finalIsland = new Path2D(mobile
+            ? "M0 850 L95 811 L343 811 L346 726 L352 726 L354 811 L496 811 Q533 795 586 811 L616 812 L714 861 L714 1162 L0 1162 Z"
+            : "M464 728 L602 688 L627 688 L629 682 Q675 678 724 683 L729 692 L735 692 L735 675 L750 675 L750 693 L931 693 L931 582 L938 580 L942 696 L1256 696 L1257 664 Q1303 657 1351 666 L1366 695 L1417 693 L1537 728 L1537 1047 L464 1047 Z");
+        finalCtx.save();
+        finalCtx.scale(width / (mobile ? 720 : 1920), height / (mobile ? 1280 : 1080));
+        finalCtx.clip(finalIsland);
+        finalCtx.drawImage(images[images.length - 1], 0, 0, mobile ? 720 : 1920, mobile ? 1280 : 1080);
+        finalCtx.restore();
 
         let lastIndex = -1;
         const render = () => {
@@ -151,6 +170,19 @@ export default function KitchenSequence() {
                     className={`${styles.sceneImage} absolute inset-0 w-full h-full object-cover z-30 pointer-events-none`}
                 />
 
+                <motion.canvas
+                    ref={finalForegroundRef}
+                    aria-hidden="true"
+                    style={{ scale: reduceMotion ? 1.04 : sceneScale, opacity: finalForegroundOpacity }}
+                    className={`${styles.sceneImage} absolute inset-0 w-full h-full object-cover z-30 pointer-events-none`}
+                />
+
+                <motion.div
+                    aria-hidden="true"
+                    style={{ opacity: readabilityOpacity }}
+                    className={styles.readabilityBackdrop}
+                />
+
                 {/* Scrollytelling Overlays */}
                 <div className="absolute inset-0 pointer-events-none z-20 flex flex-col justify-center items-center">
                     {/* Beat A (Primary H1) */}
@@ -204,7 +236,7 @@ export default function KitchenSequence() {
 
                     {/* Beat D (H2 + CTA - interactive only when visible) */}
                     <motion.div
-                        style={{ opacity: opacityD, pointerEvents: pointerEventsD }}
+                        style={{ opacity: finalTextOpacity, y: reduceMotion ? "-11vh" : finalTitleY }}
                         className={styles.beat}
                     >
                         <p className={styles.eyebrow}>
@@ -218,21 +250,24 @@ export default function KitchenSequence() {
                         <p className={styles.description}>
                             que reconheça isso.
                         </p>
-
-                        <div className="mt-2 flex flex-col items-center">
-                            <button
-                                onClick={scrollToForm}
-                                className="group inline-flex items-center gap-3 bg-gradient-to-r from-[#E0C097] to-[#b89568] hover:from-[#eed0a7] hover:to-[#cfa372] text-black font-extrabold text-sm md:text-base px-8 py-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer uppercase tracking-wider"
-                            >
-                                <span>QUERO ENCONTRAR TRABALHO</span>
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </button>
-                            <span className={styles.caption}>
-                                Envia o teu currículo gratuitamente. Demora menos de 2 minutos.
-                            </span>
-                        </div>
                     </motion.div>
                 </div>
+
+                <motion.div
+                    style={{ opacity: opacityD, pointerEvents: pointerEventsD }}
+                    className={styles.finalCta}
+                >
+                    <button
+                        onClick={scrollToForm}
+                        className="group inline-flex items-center gap-3 bg-gradient-to-r from-[#E0C097] to-[#b89568] hover:from-[#eed0a7] hover:to-[#cfa372] text-black font-extrabold text-sm md:text-base px-8 py-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer uppercase tracking-wider"
+                    >
+                        <span>QUERO ENCONTRAR TRABALHO</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                    <span className={styles.caption}>
+                        Envia o teu currículo gratuitamente. Demora menos de 2 minutos.
+                    </span>
+                </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 0 }}
